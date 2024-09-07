@@ -17,14 +17,14 @@ struct SourceControlGeneralView: View {
         SettingsForm {
             Section {
                 enableSourceControl
-                refreshLocalStatusAuto
-                fetchRefreshStatusAuto
-                addRemoveFilesAuto
-                selectFilesToCommitAuto
+                refreshLocalStatusAuto.disabled(!settings.enableSourceControl)
+                fetchRefreshStatusAuto.disabled(!settings.enableSourceControl)
+                addRemoveFilesAuto.disabled(!settings.enableSourceControl)
+                selectFilesToCommitAuto.disabled(!settings.enableSourceControl)
             }
             Section {
-                showSourceControlChanges
-                includeUpstreamChanges
+                showSourceControlChanges.disabled(!settings.enableSourceControl)
+                includeUpstreamChanges.disabled(!settings.enableSourceControl)
             }
             Section {
                 comparisonView

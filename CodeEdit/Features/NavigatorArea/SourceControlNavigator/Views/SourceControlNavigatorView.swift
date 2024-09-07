@@ -11,7 +11,7 @@ struct SourceControlNavigatorView: View {
     @EnvironmentObject private var workspace: WorkspaceDocument
 
     var body: some View {
-        if let sourceControlManager = workspace.workspaceFileManager?.sourceControlManager {
+        if let sourceControlManager = workspace.sourceControlManager {
             VStack(spacing: 0) {
                 SourceControlNavigatorTabs()
                     .environmentObject(sourceControlManager)
@@ -30,6 +30,14 @@ struct SourceControlNavigatorView: View {
                 SourceControlNavigatorToolbarBottom()
                     .environmentObject(sourceControlManager)
             }
+        } else {
+            VStack {
+                CEContentUnavailableView(
+                    "Source control is disabled",
+                    description: "You can enable it in CodeEdit settings.",
+                    systemImage: "externaldrive.fill"
+                )
+            }
         }
     }
 }
@@ -37,6 +45,8 @@ struct SourceControlNavigatorView: View {
 struct SourceControlNavigatorTabs: View {
     @EnvironmentObject var sourceControlManager: SourceControlManager
     @State private var selectedSection: Int = 0
+    @AppSettings(\.sourceControl.general.enableSourceControl)
+    var isSourceControlEnabled
 
     var body: some View {
         if sourceControlManager.isGitRepository {

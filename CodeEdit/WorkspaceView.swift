@@ -36,7 +36,7 @@ struct WorkspaceView: View {
     private var keybindings: KeybindingManager =  .shared
 
     var body: some View {
-        if workspace.workspaceFileManager != nil, let sourceControlManager = workspace.sourceControlManager {
+        if workspace.workspaceFileManager != nil {
             VStack {
                 SplitViewReader { proxy in
                     SplitView(axis: .vertical) {
@@ -111,15 +111,16 @@ struct WorkspaceView: View {
                     }
                     .task {
                         themeModel.colorScheme = colorScheme
-
-                        do {
-                            try await sourceControlManager.refreshRemotes()
-                            try await sourceControlManager.refreshStashEntries()
-                        } catch {
-                            await sourceControlManager.showAlertForError(
-                                title: "Error refreshing Git data",
-                                error: error
-                            )
+                        if let sourceControlManager = workspace.sourceControlManager {
+                            do {
+                                try await sourceControlManager.refreshRemotes()
+                                try await sourceControlManager.refreshStashEntries()
+                            } catch {
+                                await sourceControlManager.showAlertForError(
+                                    title: "Error refreshing Git data",
+                                    error: error
+                                )
+                            }
                         }
                     }
                     .onChange(of: colorScheme) { newValue in
@@ -152,7 +153,7 @@ struct WorkspaceView: View {
                 }
             }
             .background(EffectView(.contentBackground))
-            .background(WorkspaceSheets().environmentObject(sourceControlManager))
+//            .background(WorkspaceSheets().environmentObject(sourceControlManager))
             .accessibilityElement(children: .contain)
             .accessibilityLabel("workspace area")
         }

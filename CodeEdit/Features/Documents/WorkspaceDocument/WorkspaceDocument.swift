@@ -36,7 +36,7 @@ final class WorkspaceDocument: NSDocument, ObservableObject, NSToolbarDelegate {
     var openQuicklyViewModel: OpenQuicklyViewModel?
     var commandsPaletteState: QuickActionsViewModel?
     var listenerModel: WorkspaceNotificationModel = .init()
-    var sourceControlManager: SourceControlManager?
+    @Published var sourceControlManager: SourceControlManager?
 
     var taskManager: TaskManager?
     var workspaceSettingsManager: CEWorkspaceSettings?
@@ -123,22 +123,19 @@ final class WorkspaceDocument: NSDocument, ObservableObject, NSToolbarDelegate {
         self.fileURL = url
         self.displayName = url.lastPathComponent
 
-        let sourceControlManager = SourceControlManager(
-            workspaceURL: url,
-            editorManager: editorManager!
-        )
-
         self.workspaceFileManager = .init(
             folderUrl: url,
-            ignoredFilesAndFolders: Set(ignoredFilesAndDirectory),
-            sourceControlManager: sourceControlManager
+            ignoredFilesAndFolders: Set(ignoredFilesAndDirectory)
         )
-        self.sourceControlManager = sourceControlManager
-        sourceControlManager.fileManager = workspaceFileManager
         self.searchState = .init(self)
         self.openQuicklyViewModel = .init(fileURL: url)
         self.commandsPaletteState = .init()
         self.workspaceSettingsManager = CEWorkspaceSettings(workspaceURL: url)
+        Settings.shared.$preferences.sink { [weak self] settingsData in
+            guard let self else { return }
+            self.setSourceControlManager(settingsData.sourceControl.general.enableSourceControl)
+        }
+        .store(in: &cancellables)
         if let workspaceSettingsManager {
             self.taskManager = TaskManager(
                 workspaceSettings: workspaceSettingsManager.settings,
@@ -148,6 +145,24 @@ final class WorkspaceDocument: NSDocument, ObservableObject, NSToolbarDelegate {
 
         editorManager?.restoreFromState(self)
         utilityAreaModel?.restoreFromState(self)
+    }
+    
+    func setSourceControlManager(_ isEnabled: Bool) {
+        guard let fileURL, let editorManager else { return }
+        if isEnabled {
+            let sourceControlManager = SourceControlManager(
+                workspaceURL: fileURL,
+                editorManager: editorManager
+            )
+            Task {
+                try? await sourceControlManager.validate()
+            }
+            self.sourceControlManager = sourceControlManager
+            self.sourceControlManager?.fileManager = self.workspaceFileManager
+            self.workspaceFileManager?.sourceControlManager = sourceControlManager
+        } else {
+            self.sourceControlManager = nil
+        }
     }
 
     override func read(from url: URL, ofType typeName: String) throws {

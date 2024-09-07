@@ -60,15 +60,13 @@ final class CEWorkspaceFileManager {
     init(
         folderUrl: URL,
         ignoredFilesAndFolders: Set<String>,
-        fileManager: FileManager = FileManager.default,
-        sourceControlManager: SourceControlManager?
+        fileManager: FileManager = FileManager.default
     ) {
         self.folderUrl = folderUrl
         self.ignoredFilesAndFolders = ignoredFilesAndFolders
 
         self.workspaceItem = CEWorkspaceFile(url: folderUrl)
         self.flattenedFileItems = [workspaceItem.id: workspaceItem]
-        self.sourceControlManager = sourceControlManager
         self.fileManager = fileManager
 
         self.loadChildrenForFile(self.workspaceItem)

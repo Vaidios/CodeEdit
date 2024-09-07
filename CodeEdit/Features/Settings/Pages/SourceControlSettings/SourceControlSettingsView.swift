@@ -7,24 +7,26 @@
 
 import SwiftUI
 
+enum SourceControlSettingsTab {
+    case general, git
+}
+
 struct SourceControlSettingsView: View {
-    @State var selectedTab: String = "general"
+    @State var selectedTab: SourceControlSettingsTab = .general
 
     var body: some View {
         Group {
             switch selectedTab {
-            case "general":
+            case .general:
                 SourceControlGeneralView()
-            case "git":
+            case .git:
                 SourceControlGitView()
-            default:
-                SourceControlGeneralView()
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             Picker("", selection: $selectedTab) {
-                Text("General").tag("general")
-                Text("Git").tag("git")
+                Text("General").tag(SourceControlSettingsTab.general)
+                Text("Git").tag(SourceControlSettingsTab.git)
             }
             .pickerStyle(.segmented)
             .labelsHidden()

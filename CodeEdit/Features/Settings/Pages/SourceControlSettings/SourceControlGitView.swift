@@ -49,20 +49,4 @@ private extension SourceControlGitView {
             isOn: $git.showMergeCommitsPerFileLog
         )
     }
-
-    private var bottomToolbar: some View {
-        HStack(spacing: 12) {
-            Button {} label: {
-                Image(systemName: "plus")
-                    .foregroundColor(Color.secondary)
-            }
-            .buttonStyle(.plain)
-            Button {} label: {
-                Image(systemName: "minus")
-            }
-            .disabled(true)
-            .buttonStyle(.plain)
-            Spacer()
-        }
-    }
 }
